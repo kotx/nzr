@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 glam = "0.25.0"
 image = { version = "0.24.9", default-features = false, features = ["png"] }
+indicatif = "0.17.8"
