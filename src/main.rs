@@ -28,6 +28,8 @@ fn ray_color(ray: Ray) -> image::Rgb<u8> {
 }
 
 fn main() {
+    let out_file = std::env::args().nth(1).unwrap_or("output.png".to_owned());
+
     let focal_length = 1.0;
     let camera_center = vec3(0., 0., 0.);
 
@@ -56,5 +58,5 @@ fn main() {
         }
     }
 
-    img.save("output.png").unwrap();
+    img.save(out_file).unwrap();
 }
