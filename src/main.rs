@@ -1,14 +1,18 @@
 #![forbid(unsafe_code)]
 #![deny(clippy::all)]
+pub mod hittable;
 pub mod ray;
 
-use std::time::Instant;
+use std::{f32::INFINITY, rc::Rc, time::Instant};
 
 use glam::{vec3, Vec3};
+use hittable::Hittable;
 use image::{ImageBuffer, RgbImage};
 
 use indicatif::{ProgressIterator, ProgressStyle};
 use ray::{ray, Ray};
+
+use crate::hittable::{group::HittableGroup, sphere::Sphere};
 
 /// Converts a [`glam::Vec3`] scaled from `0.0`-`1.0` to an [`image::Rgb`] with values from `0`-`255`
 fn vec_to_color(vec: Vec3) -> image::Rgb<u8> {
@@ -16,12 +20,16 @@ fn vec_to_color(vec: Vec3) -> image::Rgb<u8> {
     image::Rgb([scaled.x as u8, scaled.y as u8, scaled.z as u8])
 }
 
-fn ray_color(ray: Ray) -> image::Rgb<u8> {
+fn ray_color(ray: &Ray, world: &dyn Hittable) -> Vec3 {
+    if let Some(hit) = world.hit(ray, 0., INFINITY) {
+        return 0.5 * (hit.normal + vec3(1., 1., 1.));
+    }
+
+    // Sky
     let unit_dir = ray.direction.normalize();
     let a = 0.5 * (unit_dir.y + 1.);
 
-    let color = (1. - a) * vec3(1., 1., 1.) + a * vec3(0.5, 0.7, 1.0);
-    vec_to_color(color)
+    (1. - a) * vec3(1., 1., 1.) + a * vec3(0.5, 0.7, 1.0)
 }
 
 fn main() {
@@ -35,6 +43,13 @@ fn main() {
 
     let viewport_height: f32 = 2.0;
     let viewport_width: f32 = viewport_height * aspect_ratio;
+
+    // World
+
+    let mut world = HittableGroup::new();
+
+    world.add(Rc::new(Sphere::new(vec3(0., 0., -1.), 0.5)));
+    world.add(Rc::new(Sphere::new(vec3(0., -100.5, -1.), 100.)));
 
     // Camera
 
@@ -54,7 +69,6 @@ fn main() {
     // Rendering
 
     let start = Instant::now();
-
     let style = ProgressStyle::with_template(
         "RENDERING {spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len} scanlines, ETA {eta})",
     )
@@ -67,10 +81,10 @@ fn main() {
                 pixel00_loc + (x as f32 * pixel_delta_u) + (y as f32 * pixel_delta_v);
             let ray_dir = pixel_center - camera_center;
 
-            let ray = ray(pixel_center, ray_dir);
-            let color = ray_color(ray);
+            let ray = ray(camera_center, ray_dir);
+            let color = ray_color(&ray, &world);
 
-            img.put_pixel(x, y, color);
+            img.put_pixel(x, y, vec_to_color(color));
         }
     }
 

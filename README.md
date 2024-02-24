@@ -9,3 +9,7 @@ Adapted from [Ray Tracing in One Weekend](https://raytracing.github.io/books/Ray
 ![blue skies](images/blue-skies.png)
 
 *1. blue skies*
+
+![earth](images/earth.png)
+
+*2. heaven, earth, and a sphere*
