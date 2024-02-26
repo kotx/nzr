@@ -1,5 +1,7 @@
 use glam::Vec3;
 
+use crate::interval::Interval;
+
 use super::{HitRecord, Hittable};
 
 pub struct Sphere {
@@ -14,7 +16,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &crate::ray::Ray, ray_tmin: f32, ray_tmax: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &crate::ray::Ray, ray_t: Interval) -> Option<HitRecord> {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(ray.direction);
@@ -27,9 +29,9 @@ impl Hittable for Sphere {
             let sqrtd = discriminant.sqrt();
 
             let mut root = (-half_b - sqrtd) / a;
-            if root <= ray_tmin || root >= ray_tmax {
+            if !ray_t.surrounds(root) {
                 root = (-half_b + sqrtd) / a;
-                if root <= ray_tmin || root >= ray_tmax {
+                if !ray_t.surrounds(root) {
                     return None;
                 }
             }
@@ -38,7 +40,12 @@ impl Hittable for Sphere {
             let point = ray.at(t);
             let outward_normal = (point - self.center) / self.radius;
 
-            let mut rec = HitRecord { t, point, normal: Vec3::ZERO, front_face: false };
+            let mut rec = HitRecord {
+                t,
+                point,
+                normal: Vec3::ZERO,
+                front_face: false,
+            };
             rec.set_face_normal(ray, outward_normal); // set normal and front_face
 
             Some(rec)

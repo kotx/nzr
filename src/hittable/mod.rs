@@ -1,9 +1,9 @@
-pub mod sphere;
 pub mod group;
+pub mod sphere;
 
 use glam::Vec3;
 
-use crate::ray::Ray;
+use crate::{interval::Interval, ray::Ray};
 
 #[derive(Debug, Clone, Copy)]
 pub struct HitRecord {
@@ -25,5 +25,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, ray_tmin: f32, ray_tmax: f32) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord>;
 }
