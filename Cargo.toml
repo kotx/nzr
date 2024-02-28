@@ -7,3 +7,4 @@ edition = "2021"
 glam = "0.25.0"
 image = { version = "0.24.9", default-features = false, features = ["png"] }
 indicatif = "0.17.8"
+rand = "0.8.5"

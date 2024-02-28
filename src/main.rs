@@ -4,6 +4,7 @@ pub mod camera;
 pub mod hittable;
 pub mod interval;
 pub mod ray;
+pub mod util;
 
 use std::rc::Rc;
 
@@ -18,6 +19,6 @@ fn main() {
     world.add(Rc::new(Sphere::new(vec3(0., 0., -1.), 0.5)));
     world.add(Rc::new(Sphere::new(vec3(0., -100.5, -1.), 100.)));
 
-    let cam = Camera::new(256, 256);
+    let cam = Camera::new(256, 256, 100);
     cam.render(&world);
 }
