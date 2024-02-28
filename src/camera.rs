@@ -1,9 +1,9 @@
-use std::time::Instant;
+use std::{cell::RefCell, time::Instant};
 
 use glam::{vec3, Vec3};
 use image::{ImageBuffer, RgbImage};
 use indicatif::{ProgressIterator, ProgressStyle};
-use rand::random;
+use rand::{rngs::ThreadRng, thread_rng, Rng};
 
 use crate::{
     hittable::Hittable,
@@ -28,10 +28,12 @@ pub struct Camera {
     image_width: u32,
     image_height: u32,
     samples_per_pixel: u32,
+
     camera_center: Vec3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
     pixel00_loc: Vec3,
+    rng: RefCell<ThreadRng>,
 }
 
 impl Camera {
@@ -62,10 +64,12 @@ impl Camera {
             image_width,
             image_height,
             samples_per_pixel,
+
             camera_center,
             pixel_delta_u,
             pixel_delta_v,
             pixel00_loc,
+            rng: thread_rng().into(),
         }
     }
 
@@ -108,8 +112,8 @@ impl Camera {
     }
 
     fn pixel_sample_square(&self) -> Vec3 {
-        let px: f32 = -0.5 + random::<f32>();
-        let py: f32 = -0.5 + random::<f32>();
+        let px: f32 = -0.5 + self.rng.borrow_mut().gen::<f32>();
+        let py: f32 = -0.5 + self.rng.borrow_mut().gen::<f32>();
 
         (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
     }
